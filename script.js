@@ -10,19 +10,52 @@ window.addEventListener('scroll', function() {
 
 // Like button functionality
 document.querySelectorAll('.like-btn').forEach(button => {
+    // Check if this review was previously liked
+    const reviewId = button.closest('.review-card').querySelector('p').textContent;
+    const wasLiked = localStorage.getItem(`liked_${reviewId}`);
+    if (wasLiked) {
+        button.classList.add('liked');
+    }
+
     button.addEventListener('click', function() {
-        const likeCount = this.querySelector('span');
-        let count = parseInt(likeCount.textContent);
-        count++;
-        likeCount.textContent = count;
+        const likeCount = this.querySelector('.like-count');
+        const reviewId = this.closest('.review-card').querySelector('p').textContent;
         
-        // Add animation
-        this.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            this.style.transform = 'scale(1)';
-        }, 200);
+        if (!localStorage.getItem(`liked_${reviewId}`)) {
+            // Increment like count
+            let count = parseInt(likeCount.textContent);
+            count++;
+            likeCount.textContent = count;
+            
+            // Add liked state
+            this.classList.add('liked');
+            
+            // Store the like in localStorage
+            localStorage.setItem(`liked_${reviewId}`, 'true');
+            
+            // Add animation
+            this.style.animation = 'none';
+            this.offsetHeight; // Trigger reflow
+            this.style.animation = null;
+        } else {
+            // Optional: Add a small shake animation to indicate already liked
+            this.style.animation = 'shake 0.5s ease';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 500);
+        }
     });
 });
+
+// Add shake animation keyframes
+const style = document.createElement('style');
+style.textContent = `
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}`;
+document.head.appendChild(style);
 
 // Social sharing functionality
 function shareOnTwitter() {
